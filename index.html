@@ -1,0 +1,595 @@
+<!DOCTYPE html><html lang="en"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[EdUHK] Response Data Dashboard — Nigeria</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --ng-green:      #008751;
+      --ng-dark:       #005A36;
+      --ng-mid:        #00A859;
+      --ng-light:      #4DC989;
+      --ng-soft:       #b3e6cc;
+      --ng-bg:         #e8f5ee;
+      --ng-card:       #FFFFFF;
+      --ng-border:     #c2e8d5;
+      --gray-700:      #374151;
+      --gray-500:      #6B7280;
+      --gray-300:      #D1D5DB;
+      --gray-100:      #F3F4F6;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--ng-bg);
+      color: #0a1f0d;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(160deg, #003d20 0%, #005a36 35%, #008751 70%, #006b40 100%);
+      color: #fff;
+      padding: 2.25rem 1.5rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        90deg, transparent, transparent 48px,
+        rgba(255,255,255,0.04) 48px, rgba(255,255,255,0.04) 49px
+      );
+      pointer-events: none;
+    }
+
+    /* Nigeria flag strip: green | white | green */
+    .header-stripe {
+      display: flex; width: 90px; height: 6px;
+      margin: 0 auto 1rem; border-radius: 3px; overflow: hidden;
+    }
+    .s-g1 { flex: 1; background: #00A859; }
+    .s-w  { flex: 1; background: #fff; }
+    .s-g2 { flex: 1; background: #00A859; }
+
+    .header-flag { font-size: 2.6rem; margin-bottom: 0.4rem; }
+    header h1 {
+      font-size: clamp(1.1rem, 3.2vw, 1.75rem);
+      font-weight: 800; letter-spacing: -0.01em; color: #fff;
+    }
+    header h1 span { color: #a8f0c8; }
+    header .sub1 { font-size: 0.9rem; color: rgba(255,255,255,0.75); margin-top: 0.35rem; }
+    header .n-pill {
+      display: inline-block; margin-top: 0.85rem;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 999px; padding: 0.3rem 1.2rem;
+      font-size: 0.85rem; color: #a8f0c8;
+      letter-spacing: 0.04em; font-weight: 600;
+    }
+
+    /* ── MAIN ── */
+    main { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+    /* ── FLAG STRIP ── */
+    .flag-strip {
+      display: flex; height: 4px; border-radius: 2px;
+      overflow: hidden; margin-bottom: 1.5rem;
+    }
+
+    /* ── SECTION DIVIDER ── */
+    .section-divider {
+      display: flex; align-items: center; gap: 0.75rem;
+      margin: 1.5rem 0 0.9rem;
+    }
+    .section-divider span {
+      font-size: 0.72rem; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--ng-green);
+    }
+    .section-divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--ng-green) 0%, transparent 100%);
+    }
+
+    /* ── STAT CARDS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem; margin-bottom: 1rem;
+    }
+    .stat-card {
+      background: var(--ng-card); border-radius: 14px;
+      padding: 1.25rem 1rem;
+      box-shadow: 0 2px 8px rgba(0,135,81,0.13);
+      border-top: 4px solid var(--ng-green);
+      position: relative; overflow: hidden;
+    }
+    .stat-card::after {
+      content: ''; position: absolute;
+      bottom: 0; right: 0; width: 50px; height: 50px;
+      background: radial-gradient(circle at bottom right, rgba(0,135,81,0.09), transparent 70%);
+      border-radius: 50%;
+    }
+    .stat-card:nth-child(2)  { border-color: var(--ng-mid); }
+    .stat-card:nth-child(3)  { border-color: var(--ng-dark); }
+    .stat-card:nth-child(4)  { border-color: var(--ng-light); }
+
+    .stat-val   { font-size: clamp(1.6rem, 4vw, 2.3rem); font-weight: 900; color: #0a1f0d; line-height: 1.05; }
+    .stat-label { font-size: 0.78rem; color: var(--gray-500); margin-top: 0.4rem; line-height: 1.45; font-weight: 600; }
+    .stat-sub   { font-size: 0.7rem; color: #a0aec0; margin-top: 0.15rem; }
+
+    /* ── INFO BADGES ── */
+    .info-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 1rem; margin-bottom: 1rem;
+    }
+    .info-badge {
+      background: var(--ng-card); border-radius: 12px;
+      padding: 1rem 1.2rem;
+      box-shadow: 0 2px 8px rgba(0,135,81,0.10);
+      display: flex; align-items: center; gap: 0.85rem;
+      border-left: 3px solid var(--ng-green);
+    }
+    .info-badge:nth-child(2) { border-color: var(--ng-mid); }
+    .info-badge:nth-child(3) { border-color: var(--ng-dark); }
+    .badge-icon  { font-size: 1.6rem; }
+    .badge-pct   { font-size: 1.55rem; font-weight: 800; color: #0a1f0d; line-height: 1.1; }
+    .badge-desc  { font-size: 0.75rem; color: var(--gray-500); line-height: 1.45; margin-top: 0.1rem; }
+
+    /* ── CHARTS ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem; margin-bottom: 1.25rem;
+    }
+    .chart-card {
+      background: var(--ng-card); border-radius: 14px;
+      padding: 1.3rem;
+      box-shadow: 0 2px 8px rgba(0,135,81,0.10);
+    }
+    .chart-card.full { grid-column: 1 / -1; }
+    .chart-head { margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--ng-border); }
+    .chart-title {
+      font-size: 0.92rem; font-weight: 700; color: #0a1f0d;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .chart-title::before {
+      content: ''; display: inline-block;
+      width: 10px; height: 10px;
+      background: var(--ng-green);
+      border-radius: 2px; flex-shrink: 0;
+    }
+    .chart-sub  { font-size: 0.74rem; color: var(--gray-500); margin-top: 0.25rem; padding-left: 1.125rem; }
+    .chart-wrap { position: relative; width: 100%; }
+
+    /* ── INSTITUTION LIST ── */
+    .inst-list { margin-top: 0.5rem; }
+    .inst-row {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 0; border-bottom: 1px solid var(--ng-border);
+    }
+    .inst-row:last-child { border-bottom: none; }
+    .inst-rank {
+      min-width: 22px; font-size: 0.75rem; font-weight: 700;
+      color: #fff; background: var(--ng-green);
+      border-radius: 4px; text-align: center; padding: 1px 4px;
+    }
+    .inst-name  { flex: 1; font-size: 0.82rem; color: var(--gray-700); }
+    .inst-bar-bg { width: 120px; height: 8px; background: var(--gray-100); border-radius: 999px; overflow: hidden; }
+    .inst-bar   { height: 100%; border-radius: 999px; }
+    .inst-count { min-width: 28px; font-size: 0.82rem; font-weight: 800; color: #0a1f0d; text-align: right; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center; padding: 1.25rem 1rem;
+      font-size: 0.72rem; color: var(--gray-500);
+      border-top: 1px solid var(--ng-border); background: #fff;
+    }
+    .footer-strip {
+      display: flex; height: 3px; width: 90px;
+      margin: 0.6rem auto 0; border-radius: 2px; overflow: hidden;
+    }
+
+    @media (max-width: 520px) {
+      .stats-grid  { grid-template-columns: repeat(2, 1fr); }
+      .info-row    { grid-template-columns: repeat(2, 1fr); }
+      .charts-grid { grid-template-columns: 1fr; }
+      .inst-bar-bg { width: 60px; }
+    }
+    @media (max-width: 360px) {
+      .info-row   { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-stripe">
+    <div class="s-g1"></div><div class="s-w"></div><div class="s-g2"></div>
+  </div>
+  <div class="header-flag">🇳🇬</div>
+  <h1>[EdUHK] Response Data Dashboard — <span>Nigeria</span></h1>
+  <div class="sub1">Faculty Survey · Nigerian Universities · 2026</div>
+  <div class="n-pill">n = 110 respondents</div>
+</header>
+
+<main>
+
+  <!-- Nigeria flag strip -->
+  <div class="flag-strip">
+    <div style="background:#008751;flex:1;"></div>
+    <div style="background:#fff;flex:1;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;"></div>
+    <div style="background:#008751;flex:1;"></div>
+  </div>
+
+  <!-- KEY STATISTICS -->
+  <div class="section-divider"><span>Key Statistics</span></div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-val">110</div>
+      <div class="stat-label">Total Respondents</div>
+      <div class="stat-sub">Across 17 institutions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">30–39</div>
+      <div class="stat-label">Dominant Age Group</div>
+      <div class="stat-sub">40.0% of all respondents</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">37.3%</div>
+      <div class="stat-label">Daily GenAI Users</div>
+      <div class="stat-sub">Use GenAI ≥ once per day</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">46.4%</div>
+      <div class="stat-label">Using GenAI 1–2 Years</div>
+      <div class="stat-sub">Majority adoption window</div>
+    </div>
+  </div>
+
+  <!-- RESPONDENT PROFILE -->
+  <div class="section-divider"><span>Respondent Profile</span></div>
+  <div class="info-row">
+    <div class="info-badge">
+      <div class="badge-icon">👨‍🏫</div>
+      <div>
+        <div class="badge-pct">80.9%</div>
+        <div class="badge-desc">Male respondents (89 of 110)</div>
+      </div>
+    </div>
+    <div class="info-badge">
+      <div class="badge-icon">🕐</div>
+      <div>
+        <div class="badge-pct">49.1%</div>
+        <div class="badge-desc">Taught &lt; 1 year with GenAI tools</div>
+      </div>
+    </div>
+    <div class="info-badge">
+      <div class="badge-icon">📚</div>
+      <div>
+        <div class="badge-pct">33.6%</div>
+        <div class="badge-desc">Have 6–10 years teaching experience</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMOGRAPHICS -->
+  <div class="section-divider"><span>Demographics</span></div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Gender Distribution</div>
+        <div class="chart-sub">Survey respondents by gender</div>
+      </div>
+      <div class="chart-wrap" style="height:220px;">
+        <canvas id="genderChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Age Distribution</div>
+        <div class="chart-sub">Respondents by age group</div>
+      </div>
+      <div class="chart-wrap" style="height:220px;">
+        <canvas id="ageChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEACHING & GENAI USE -->
+  <div class="section-divider"><span>Teaching &amp; GenAI Use</span></div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Academic Discipline</div>
+        <div class="chart-sub">Field of teaching (top categories)</div>
+      </div>
+      <div class="chart-wrap" style="height:360px;">
+        <canvas id="disciplineChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">GenAI Usage Frequency</div>
+        <div class="chart-sub">How often do you use GenAI?</div>
+      </div>
+      <div class="chart-wrap" style="height:360px;">
+        <canvas id="freqChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPERIENCE & ADOPTION -->
+  <div class="section-divider"><span>Experience &amp; Adoption</span></div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Years of Using GenAI</div>
+        <div class="chart-sub">Respondents by GenAI adoption duration</div>
+      </div>
+      <div class="chart-wrap" style="height:230px;">
+        <canvas id="genaiYearsChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Teaching Experience</div>
+        <div class="chart-sub">Years of teaching vs. years teaching with GenAI</div>
+      </div>
+      <div class="chart-wrap" style="height:230px;">
+        <canvas id="teachingChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSTITUTIONS -->
+  <div class="section-divider"><span>Institutions</span></div>
+  <div class="chart-card full">
+    <div class="chart-head">
+      <div class="chart-title">Top Institutions</div>
+      <div class="chart-sub">By number of respondents</div>
+    </div>
+    <div class="inst-list" id="instList"></div>
+  </div>
+
+</main>
+
+<footer>
+  Dashboard generated from EdUHK_Nigeria_Psychometric Test_Final Report.xlsx · All data anonymised · March 2026
+  <div class="footer-strip">
+    <div style="background:#008751;flex:1;"></div>
+    <div style="background:#ccc;flex:1;"></div>
+    <div style="background:#008751;flex:1;"></div>
+  </div>
+</footer>
+
+<script>
+  const N = 110;
+
+  /* ── Nigeria flag palette ── */
+  const G1  = '#008751'; // primary green
+  const G2  = '#005A36'; // dark green
+  const G3  = '#00A859'; // mid green
+  const G4  = '#4DC989'; // light green
+  const G5  = '#b3e6cc'; // soft green
+  const GR1 = '#374151';
+  const GR2 = '#6B7280';
+  const GR3 = '#9CA3AF';
+
+  const base = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { labels: { font: { size: 11 }, padding: 10 } } }
+  };
+
+  /* ── GENDER (Male 89, Female 21) ── */
+  new Chart(document.getElementById('genderChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Male (89)', 'Female (21)'],
+      datasets: [{
+        data: [89, 21],
+        backgroundColor: [G1, G3],
+        borderWidth: 3, borderColor: '#fff', hoverOffset: 6
+      }]
+    },
+    options: {
+      ...base, cutout: '62%',
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.label.split('(')[0].trim()}: ${ctx.raw} (${(ctx.raw/N*100).toFixed(1)}%)` }
+        }
+      }
+    }
+  });
+
+  /* ── AGE (20-29:3, 30-39:44, 40-49:40, 50-59:15, 60+:8) ── */
+  new Chart(document.getElementById('ageChart'), {
+    type: 'bar',
+    data: {
+      labels: ['20–29', '30–39', '40–49', '50–59', '60+'],
+      datasets: [{
+        label: 'Respondents',
+        data: [3, 44, 40, 15, 8],
+        backgroundColor: [G5, G1, G2, G3, G4],
+        borderRadius: 7, borderSkipped: false
+      }]
+    },
+    options: {
+      ...base,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.raw} respondents (${(ctx.raw/N*100).toFixed(1)}%)` } }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 10 }, grid: { color: '#d4f0e2' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  /* ── DISCIPLINE ── */
+  new Chart(document.getElementById('disciplineChart'), {
+    type: 'bar',
+    data: {
+      labels: [
+        'Engineering', 'Computer Science', 'Applied Sciences',
+        'Natural Sciences', 'Health & Wellness', 'Education',
+        'Agriculture (all)', 'Social Sciences', 'Real Estate & Const.',
+        'Arts & Humanities', 'Language', 'Business Admin.',
+        'Others'
+      ],
+      datasets: [{
+        label: 'Respondents',
+        data: [26, 12, 9, 8, 8, 8, 7, 6, 5, 4, 4, 3, 10],
+        backgroundColor: [
+          G2, G1, G3, G4, G5,
+          G2, G1, G3, G4,
+          G5, GR1, GR2, GR3
+        ],
+        borderRadius: 5, borderSkipped: false
+      }]
+    },
+    options: {
+      ...base,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.raw} (${(ctx.raw/N*100).toFixed(1)}%)` } }
+      },
+      scales: {
+        x: { beginAtZero: true, grid: { color: '#d4f0e2' }, ticks: { stepSize: 5 } },
+        y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+
+  /* ── FREQUENCY (>3/day:21, 2-3/day:16, 1/day:4, 4-6/wk:21, 1-3/wk:24, <1/wk:24) ── */
+  new Chart(document.getElementById('freqChart'), {
+    type: 'bar',
+    data: {
+      labels: ['> 3×/day', '2–3×/day', '1×/day', '4–6×/week', '1–3×/week', '< 1×/week'],
+      datasets: [{
+        label: 'Respondents',
+        data: [21, 16, 4, 21, 24, 24],
+        backgroundColor: [G2, G1, G3, G4, G5, GR2],
+        borderRadius: 7, borderSkipped: false
+      }]
+    },
+    options: {
+      ...base,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.raw} (${(ctx.raw/N*100).toFixed(1)}%)` } }
+      },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#d4f0e2' } },
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+
+  /* ── YEARS USING GENAI (<1yr:21, 1-2yr:51, 3-4yr:38) ── */
+  new Chart(document.getElementById('genaiYearsChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['< 1 Year (21)', '1–2 Years (51)', '3–4 Years (38)'],
+      datasets: [{
+        data: [21, 51, 38],
+        backgroundColor: [G3, G1, G2],
+        borderWidth: 3, borderColor: '#fff', hoverOffset: 6
+      }]
+    },
+    options: {
+      ...base, cutout: '60%',
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.raw} respondents (${(ctx.raw/N*100).toFixed(1)}%)` } }
+      }
+    }
+  });
+
+  /* ── TEACHING EXP vs GENAI TEACHING ──
+     Teaching: <1yr:9, 1-5yr:15, 6-10yr:37, 11-15yr:21, >15yr:28
+     w/ GenAI: <1yr:54, 1-2yr:48, 3-4yr:8                          */
+  new Chart(document.getElementById('teachingChart'), {
+    type: 'bar',
+    data: {
+      labels: ['< 1 yr', '1–5 yrs', '6–10 yrs', '11–15 yrs', '> 15 yrs'],
+      datasets: [
+        {
+          label: 'Teaching Experience',
+          data: [9, 15, 37, 21, 28],
+          backgroundColor: G1,
+          borderRadius: 5, borderSkipped: false
+        },
+        {
+          label: 'Teaching w/ GenAI',
+          data: [54, 48, 8, 0, 0],
+          backgroundColor: G3,
+          borderRadius: 5, borderSkipped: false
+        }
+      ]
+    },
+    options: {
+      ...base,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 10 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}` } }
+      },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#d4f0e2' } },
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+
+  /* ── INSTITUTIONS ── */
+  const institutions = [
+    { name: 'Ahmadu Bello University, Zaria',                     count: 65, tier: 0 },
+    { name: 'Federal University of Transportation, Daura',        count: 16, tier: 0 },
+    { name: 'Abubakar Tafawa Balewa University, Bauchi',          count: 6,  tier: 1 },
+    { name: 'Federal University of Education, Zaria',             count: 4,  tier: 1 },
+    { name: 'Federal University Dutsin-Ma',                       count: 4,  tier: 1 },
+    { name: 'Nnamdi Azikiwe University, Awka',                    count: 3,  tier: 1 },
+    { name: 'National Research Institute for Chem. Tech., Zaria', count: 2,  tier: 2 },
+    { name: 'Adekunle Ajasin University, Akungba Akoko',          count: 1,  tier: 2 },
+    { name: 'Aminu Kano College of Islamic Legal Studies',        count: 1,  tier: 2 },
+    { name: 'Auchi Polytechnic, Auchi',                           count: 1,  tier: 2 },
+    { name: 'Bayero University Kano',                              count: 1,  tier: 2 },
+    { name: 'Federal University Gusau',                            count: 1,  tier: 2 },
+    { name: 'Federal University of Technology, Minna',            count: 1,  tier: 2 },
+    { name: 'Kaduna State University',                             count: 1,  tier: 2 },
+    { name: 'Modibbo Adama University, Yola',                     count: 1,  tier: 2 },
+    { name: 'Umaru Musa Yaradua University',                       count: 1,  tier: 2 },
+    { name: '*Undefined',                                          count: 1,  tier: 2 },
+  ];
+
+  const maxCount   = institutions[0].count;
+  const tierColors = [G1, G3, G5];
+  const listEl     = document.getElementById('instList');
+
+  institutions.forEach((inst, i) => {
+    const pct = (inst.count / maxCount * 100).toFixed(0);
+    const row = document.createElement('div');
+    row.className = 'inst-row';
+    row.innerHTML = `
+      <span class="inst-rank">#${i + 1}</span>
+      <span class="inst-name">${inst.name}</span>
+      <div class="inst-bar-bg">
+        <div class="inst-bar" style="width:${pct}%;background:${tierColors[inst.tier]};"></div>
+      </div>
+      <span class="inst-count">${inst.count}</span>
+    `;
+    listEl.appendChild(row);
+  });
+</script>
+
+
+</body></html>
